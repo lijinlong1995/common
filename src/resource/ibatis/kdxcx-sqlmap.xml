@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+		
+<sqlMap namespace="express">
+    
+    <!-- 员工 -->
+    <typeAlias alias="Employee1" type="code.kdpc.pojo.Employee" />
+    <!-- 充值表 -->
+    <typeAlias   alias="KDBalance"   type="code.kdpc.pojo.KDBalance"/>
+    
+    
+    <!-- 注册成功生成管理员账号 -->
+    <insert   id="AddAccount"   parameterClass="Employee1">
+        insert  into   T_Employee  
+        (FType,FAccount,FPassword,FExpressNetworkId)
+        values
+        (#FType#,#FAccount#,#FPassword#,#FExpressNetworkId#)
+    </insert>
+    
+    
+     <!-- 登录 -->
+     <select  id="login"   parameterClass="Employee1"   resultClass="Employee1">
+         select  *   from  T_Employee  where  FAccount = #FAccount#   and  FPassword= #FPassword#
+     </select>
+        
+        <!-- 查询待审核列表  -->
+        <select  id="queryToBeAudited"  resultClass="KDBalance"  parameterClass="KDBalance">
+            select  *    from  
+            (SELECT *,ROW_NUMBER() OVER (ORDER BY FCreateTime  desc) AS RowNumber
+		      FROM   T_KDBalance  where  1 = 1  
+               )m
+               where RowNumber  between $begin$  AND  $end$   
+        </select>
+        
+        <!-- 查询待审核列表数量 -->
+        <select   id="queryToBeAuditedCount"   parameterClass="KDBalance"  resultClass="java.lang.Integer">
+            select  count(1)  from  T_KDBalance
+        </select>
+        
+        <!-- 审核 -->
+        <update  id="updateKDStatus"   parameterClass="KDBalance">
+            update  T_KDBalance   set
+            FStatus = #FStatus#
+            where  FId = #FId#
+        </update>
+        
+        <!-- 根据网点ID查询网点名称 -->
+        <select  id="queryStorebyFId"  parameterClass="String"   resultClass="String">
+            select  FName    from  T_Store  where FId = #FId#
+        </select>
+        
+        <!-- 查询缴费详情 -->
+	        <select  id="queryAllKDBalance"   parameterClass="String"   resultClass="KDBalance">
+	            select   Top  1  *   from  T_KDBalance  where  FStoreId  = #FStoreId#
+	        </select>
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+</sqlMap>
